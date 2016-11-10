@@ -1,0 +1,452 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Copy_3_of_SSVEP</title><meta name="generator" content="MATLAB 9.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-07-20"><meta name="DC.source" content="Copy_3_of_SSVEP.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Initialization</a></li><li><a href="#3">Preprocessing</a></li><li><a href="#4">Feature extraction</a></li></ul></div><pre class="codeinput">clear <span class="string">all</span>
+close <span class="string">all</span>
+</pre><h2>Initialization<a name="2"></a></h2><p>load SSVEP</p><pre class="codeinput">k = 5; <span class="comment">%subject k</span>
+vis = 2; <span class="comment">%channel to present</span>
+<span class="keyword">if</span> vis ==1
+    pres = <span class="string">'O1'</span>;
+<span class="keyword">end</span>
+<span class="keyword">if</span> vis ==2
+    pres = <span class="string">'O2'</span>;
+<span class="keyword">end</span>
+<span class="comment">%1=O1</span>
+<span class="comment">%2=O2</span>
+epoch_time = 10;
+<span class="comment">% filename = 'S1-stim_14Hz_10seconds_5trials-05.07.16.18.11.25.edf';</span>
+<span class="comment">% filename = 'S1-stim_6Hz_10sec_epoching_5trials-05.07.16.18.06.10.edf';</span>
+<span class="comment">% filename = 'S2-stim_6Hz_10secondsepoch_5trials-05.07.16.19.09.55.edf';</span>
+<span class="keyword">if</span> k==4
+    filename1 = <span class="string">'S4-D-18.07.16.23.01.55.edf'</span>;
+    filename2 = <span class="string">'S4-B-18.07.16.22.52.09.edf'</span>;
+    filename3 = <span class="string">'S4-C-18.07.16.22.55.11.edf'</span>;
+    filename4 = <span class="string">'S4-D-18.07.16.23.01.55.edf'</span>;
+<span class="keyword">end</span>
+<span class="keyword">if</span> k==3
+    filename1 = <span class="string">'S3-A-18.07.16.22.22.54.edf'</span>;
+    filename2 = <span class="string">'S3-B-18.07.16.22.29.04.edf'</span>;
+    filename3 = <span class="string">'S3-C-18.07.16.22.32.27.edf'</span>;
+    filename4 = <span class="string">'S3-D-18.07.16.22.35.27.edf'</span>;
+<span class="keyword">end</span>
+<span class="keyword">if</span> k==5
+    filename1 = <span class="string">'S4-A1-19.07.16.22.25.23.edf'</span>;
+    filename2 = <span class="string">'S4-B1-19.07.16.22.29.16.edf'</span>;
+    filename3 = <span class="string">'S4-C1-19.07.16.22.32.36.edf'</span>;
+    filename4 = <span class="string">'S4-D1-19.07.16.22.35.39.edf'</span>;
+<span class="keyword">end</span>
+[hdr1,M1] = edfread(filename1);
+[~,M2] = edfread(filename2);
+[~,M3] = edfread(filename3);
+[~,M4] = edfread(filename4);
+M =[M1(3:16,641:16000),M2(3:16,641:16000),M3(3:16,641:16000),M4(3:16,641:16000)]; <span class="comment">%extrach the 14 channelstrial = 12;</span>
+len = size(M,2);
+t = linspace(0,len/128,len); <span class="comment">%generate the time line</span>
+<span class="comment">% lab = repmat([1 2],1,10/2);% generate the lab vector</span>
+lab = repmat([1 2 2 1 1 1 2 2 1 2 2 1],[1,4]); <span class="comment">%session1</span>
+trial = 48;
+<span class="comment">% lab = [2 1 1 2 2 2 1 1 2 1 2 1];%session2</span>
+channel = [7,8];
+<span class="comment">% %7 = O1</span>
+<span class="comment">% %8 = O2</span>
+
+figure(1)
+subplot(2,1,1)
+plot(t,M(channel(1),:),t,M(channel(2),:)+100)
+legend(hdr1.label{channel(1)+2},hdr1.label{channel(2)+2})
+
+grid <span class="string">on</span>
+title(<span class="string">'Row Signal'</span>);xlabel(<span class="string">'Time(seconds)'</span>)
+<span class="keyword">for</span> i = 0:trial-1
+    line([10*i,10*i],[3000,5000],<span class="string">'Color'</span>,<span class="string">'red'</span>,<span class="string">'LineWidth'</span>,1)
+    line([10*i+5,10*i+5],[3000,5000],<span class="string">'Color'</span>,<span class="string">'red'</span>,<span class="string">'LineStyle'</span>,<span class="string">'--'</span>,<span class="string">'LineWidth'</span>,1)
+<span class="keyword">end</span>
+<span class="comment">% trial = floor((L/(128*epoch_time))); %generate the trials</span>
+</pre><pre class="codeoutput">Step 1 of 2: Reading requested records. (This may take a few minutes.)...
+Step 2 of 2: Parsing data...
+Step 1 of 2: Reading requested records. (This may take a few minutes.)...
+Step 2 of 2: Parsing data...
+Step 1 of 2: Reading requested records. (This may take a few minutes.)...
+Step 2 of 2: Parsing data...
+Step 1 of 2: Reading requested records. (This may take a few minutes.)...
+Step 2 of 2: Parsing data...
+</pre><img vspace="5" hspace="5" src="Copy_3_of_SSVEP_01.png" alt=""> <h2>Preprocessing<a name="3"></a></h2><p>bad trial rejection rej = [5 7 12 15 17 19 20 28 29 30 31 32 33 34 41 43 44];</p><pre class="codeinput"><span class="keyword">if</span> k==4
+    rej = [12 15 28 29 43]; <span class="comment">%subject4</span>
+<span class="keyword">end</span>
+<span class="keyword">if</span> k==3
+    rej = [20]; <span class="comment">%subject3</span>
+<span class="keyword">end</span>
+<span class="keyword">if</span> k==5
+    rej = [6 7 19 21 22 23 25 26 33 34 37 40];
+<span class="keyword">end</span>
+<span class="keyword">for</span> i = 1:length(rej)
+    M(:,rej(i)*1280+1:rej(i)*1280+1280)=zeros(14,1280);
+<span class="keyword">end</span>
+M(:,mean(M)==0) = [];
+lab(rej+1) = [];
+len = size(M,2);
+t = linspace(0,len/128,len);
+trial = trial -length(rej);
+<span class="comment">% detrending</span>
+<span class="keyword">for</span> ch = 1:14
+    M(ch,:) = M(ch,:)-mean(M(ch,:),2);
+<span class="keyword">end</span>
+<span class="comment">% %%Alternative: high-pass filter with cutoff 1 Hz</span>
+
+<span class="comment">% band pass filter</span>
+low  = 3;
+high = 50;
+<span class="keyword">for</span> ch = 7:8
+    M(ch,:) = bandfilter(M(ch,:),low,high,128);
+<span class="keyword">end</span>
+
+<span class="comment">% artifacts removal</span>
+<span class="comment">% M = M - ones(14,1)*mean(M);</span>
+<span class="comment">% [W,~,S] = amuse(M);</span>
+<span class="comment">% figure(2)</span>
+<span class="comment">% for i =1:14</span>
+<span class="comment">%     plot(t,S(i,:)+(i-1)*10);</span>
+<span class="comment">%     hold on</span>
+<span class="comment">% end</span>
+<span class="comment">% S([1,14],:) = [];</span>
+<span class="comment">% W([1,14],:) = [];</span>
+<span class="comment">% M = pinv(W)*S; % reconstruct the signal ==&gt; artifacts removal</span>
+
+figure(1)
+subplot(2,1,2)
+plot(t,M(7,:),t,M(8,:)+100)
+legend(hdr1.label{channel(1)+2},hdr1.label{channel(2)+2})
+grid <span class="string">on</span>
+title(<span class="string">'Artifacts Removed Signal'</span>);xlabel(<span class="string">'Time(seconds)'</span>)
+hold <span class="string">on</span>
+<span class="keyword">for</span> i = 0:trial-1
+    line([10*i,10*i],[-140,140],<span class="string">'Color'</span>,<span class="string">'red'</span>,<span class="string">'LineWidth'</span>,1)
+    line([10*i+5,10*i+5],[-140,140],<span class="string">'Color'</span>,<span class="string">'red'</span>,<span class="string">'LineStyle'</span>,<span class="string">'--'</span>,<span class="string">'LineWidth'</span>,1)
+<span class="keyword">end</span>
+<span class="comment">%visulization of segmentation</span>
+hold <span class="string">off</span>
+</pre><img vspace="5" hspace="5" src="Copy_3_of_SSVEP_02.png" alt=""> <h2>Feature extraction<a name="4"></a></h2><pre class="codeinput">epochs = [];
+epoch_start = 0.5;
+epoch_period = 4.5;
+
+<span class="keyword">for</span> e = 1:trial
+    epochs(:,:,e) = M(channel,(epoch_start+epoch_time*(e-1))*128+1:<span class="keyword">...</span>
+        (epoch_start+epoch_time*(e-1)+epoch_period)*128);
+<span class="comment">%     fepochs(:,:,e) = fx(:,epoch_time*(e-1)*128+1:(epoch_time*e)*128);</span>
+<span class="keyword">end</span>
+
+<span class="comment">% s1 = epochs(:,:,lab==1);%7.5Hz</span>
+<span class="comment">% s2 = epochs(:,:,lab==2);%10 Hz</span>
+<span class="comment">%</span>
+<span class="comment">% % stim_rms = sqrt(mean(fepochs(1,:,lab==1).^2,2))</span>
+<span class="comment">% % ref_rms = sqrt(mean(fepochs(1,:,lab==2).^2,2))</span>
+<span class="comment">% %</span>
+<span class="comment">% % boxplot(squeeze(stim_rms))</span>
+<span class="comment">% figure(3)</span>
+<span class="comment">% plot(squeeze(s1(1,:,1)))</span>
+<span class="comment">% hold on</span>
+<span class="comment">% plot(squeeze(s2(1,:,1)),'g')</span>
+<span class="comment">% title('Bandfiltered signals of the first trial');</span>
+<span class="comment">% legend('7.5Hz','10Hz')</span>
+
+window = 4*128;
+noverlap = 510;
+nfft = 4*128;
+fs = 128;
+<span class="keyword">for</span> e = 1:trial
+    [pxx(:,e),f] = pwelch(epochs(vis,1:end,e),window,noverlap,nfft,fs);
+<span class="keyword">end</span>
+
+figure(3)
+subplot(3,1,1)
+plot(f(1:end),pxx(1:end,lab==1))
+hold <span class="string">on</span>
+plot(f(1:end),mean(pxx(1:end,lab==1),2),<span class="string">'k'</span>,<span class="string">'LineWidth'</span>,3)
+title(<span class="string">'The 7.5Hz signal'</span>)
+<span class="comment">% legend('Trial1','Trial2','Trial3','Trial4','Trial5','Trial6','Average')</span>
+axis([0,40,0,inf])
+
+subplot(3,1,2)
+plot(f(1:end),pxx(1:end,lab==2))
+hold <span class="string">on</span>
+plot(f(1:end),mean(pxx(1:end,lab==2),2),<span class="string">'k'</span>,<span class="string">'LineWidth'</span>,3)
+title(<span class="string">'The 12Hz signal'</span>)
+<span class="comment">% legend('Trial1','Trial2','Trial3','Trial4','Trial5','Trial6','Average')</span>
+axis([0,40,0,inf])
+
+subplot(3,1,3)
+plot(f(1:end),mean(pxx(1:end,lab==1),2),<span class="string">'b'</span>,<span class="string">'LineWidth'</span>,3)
+hold <span class="string">on</span>
+plot(f(1:end),mean(pxx(1:end,lab==2),2),<span class="string">'g'</span>,<span class="string">'LineWidth'</span>,3)
+title(<span class="string">'The averaged 7.5Hz signal and 10Hz signal'</span>);xlabel(<span class="string">'Frequency(Hz)'</span>);
+legend(<span class="string">'7.5Hz'</span>,<span class="string">'12Hz'</span>)
+axis([0,40,0,inf])
+
+fprintf(<span class="string">'Suject %s Channel %s'</span>,num2str(k),pres)
+<span class="comment">% figure(4)</span>
+<span class="comment">% spectrogram(epochs(1,1:end,5),window,noverlap,nfft,fs,'yaxis')</span>
+<span class="comment">% % axis([10 20 2 3 -inf 10])</span>
+<span class="comment">% view([90,0])</span>
+</pre><pre class="codeoutput">Suject 5 Channel O2</pre><img vspace="5" hspace="5" src="Copy_3_of_SSVEP_03.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2016a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+clear all
+close all
+
+%% Initialization
+% load SSVEP
+k = 5; %subject k
+vis = 2; %channel to present
+if vis ==1
+    pres = 'O1';
+end
+if vis ==2
+    pres = 'O2';
+end
+%1=O1
+%2=O2
+epoch_time = 10;
+% filename = 'S1-stim_14Hz_10seconds_5trials-05.07.16.18.11.25.edf';
+% filename = 'S1-stim_6Hz_10sec_epoching_5trials-05.07.16.18.06.10.edf';
+% filename = 'S2-stim_6Hz_10secondsepoch_5trials-05.07.16.19.09.55.edf';
+if k==4
+    filename1 = 'S4-D-18.07.16.23.01.55.edf';
+    filename2 = 'S4-B-18.07.16.22.52.09.edf';
+    filename3 = 'S4-C-18.07.16.22.55.11.edf';
+    filename4 = 'S4-D-18.07.16.23.01.55.edf';
+end
+if k==3
+    filename1 = 'S3-A-18.07.16.22.22.54.edf';
+    filename2 = 'S3-B-18.07.16.22.29.04.edf';
+    filename3 = 'S3-C-18.07.16.22.32.27.edf';
+    filename4 = 'S3-D-18.07.16.22.35.27.edf';
+end
+if k==5
+    filename1 = 'S4-A1-19.07.16.22.25.23.edf';
+    filename2 = 'S4-B1-19.07.16.22.29.16.edf';
+    filename3 = 'S4-C1-19.07.16.22.32.36.edf';
+    filename4 = 'S4-D1-19.07.16.22.35.39.edf';
+end
+[hdr1,M1] = edfread(filename1);
+[~,M2] = edfread(filename2);
+[~,M3] = edfread(filename3);
+[~,M4] = edfread(filename4);
+M =[M1(3:16,641:16000),M2(3:16,641:16000),M3(3:16,641:16000),M4(3:16,641:16000)]; %extrach the 14 channelstrial = 12;
+len = size(M,2);
+t = linspace(0,len/128,len); %generate the time line
+% lab = repmat([1 2],1,10/2);% generate the lab vector
+lab = repmat([1 2 2 1 1 1 2 2 1 2 2 1],[1,4]); %session1
+trial = 48;
+% lab = [2 1 1 2 2 2 1 1 2 1 2 1];%session2
+channel = [7,8];
+% %7 = O1
+% %8 = O2
+
+figure(1)
+subplot(2,1,1)
+plot(t,M(channel(1),:),t,M(channel(2),:)+100)
+legend(hdr1.label{channel(1)+2},hdr1.label{channel(2)+2})
+
+grid on
+title('Row Signal');xlabel('Time(seconds)')
+for i = 0:trial-1
+    line([10*i,10*i],[3000,5000],'Color','red','LineWidth',1)
+    line([10*i+5,10*i+5],[3000,5000],'Color','red','LineStyle','REPLACE_WITH_DASH_DASH','LineWidth',1)
+end
+% trial = floor((L/(128*epoch_time))); %generate the trials 
+
+%% Preprocessing
+% bad trial rejection
+% rej = [5 7 12 15 17 19 20 28 29 30 31 32 33 34 41 43 44];
+if k==4
+    rej = [12 15 28 29 43]; %subject4
+end
+if k==3
+    rej = [20]; %subject3
+end
+if k==5
+    rej = [6 7 19 21 22 23 25 26 33 34 37 40];
+end
+for i = 1:length(rej)
+    M(:,rej(i)*1280+1:rej(i)*1280+1280)=zeros(14,1280);
+end
+M(:,mean(M)==0) = [];
+lab(rej+1) = [];
+len = size(M,2);
+t = linspace(0,len/128,len);
+trial = trial -length(rej);
+% detrending
+for ch = 1:14
+    M(ch,:) = M(ch,:)-mean(M(ch,:),2);
+end
+% %%Alternative: high-pass filter with cutoff 1 Hz
+
+% band pass filter
+low  = 3;
+high = 50;
+for ch = 7:8
+    M(ch,:) = bandfilter(M(ch,:),low,high,128);
+end
+
+% artifacts removal
+% M = M - ones(14,1)*mean(M);
+% [W,~,S] = amuse(M);
+% figure(2)
+% for i =1:14
+%     plot(t,S(i,:)+(i-1)*10);
+%     hold on
+% end
+% S([1,14],:) = [];
+% W([1,14],:) = [];
+% M = pinv(W)*S; % reconstruct the signal ==> artifacts removal
+
+figure(1)
+subplot(2,1,2)
+plot(t,M(7,:),t,M(8,:)+100)
+legend(hdr1.label{channel(1)+2},hdr1.label{channel(2)+2})
+grid on
+title('Artifacts Removed Signal');xlabel('Time(seconds)')
+hold on
+for i = 0:trial-1
+    line([10*i,10*i],[-140,140],'Color','red','LineWidth',1)
+    line([10*i+5,10*i+5],[-140,140],'Color','red','LineStyle','REPLACE_WITH_DASH_DASH','LineWidth',1)
+end
+%visulization of segmentation
+hold off
+
+
+
+%% Feature extraction
+epochs = [];
+epoch_start = 0.5;
+epoch_period = 4.5;
+
+for e = 1:trial
+    epochs(:,:,e) = M(channel,(epoch_start+epoch_time*(e-1))*128+1:...
+        (epoch_start+epoch_time*(e-1)+epoch_period)*128);
+%     fepochs(:,:,e) = fx(:,epoch_time*(e-1)*128+1:(epoch_time*e)*128);
+end
+
+% s1 = epochs(:,:,lab==1);%7.5Hz
+% s2 = epochs(:,:,lab==2);%10 Hz
+% 
+% % stim_rms = sqrt(mean(fepochs(1,:,lab==1).^2,2))
+% % ref_rms = sqrt(mean(fepochs(1,:,lab==2).^2,2))
+% % 
+% % boxplot(squeeze(stim_rms))
+% figure(3)
+% plot(squeeze(s1(1,:,1)))
+% hold on
+% plot(squeeze(s2(1,:,1)),'g')
+% title('Bandfiltered signals of the first trial');
+% legend('7.5Hz','10Hz')
+
+window = 4*128;
+noverlap = 510;
+nfft = 4*128;
+fs = 128;
+for e = 1:trial
+    [pxx(:,e),f] = pwelch(epochs(vis,1:end,e),window,noverlap,nfft,fs);
+end
+
+figure(3)
+subplot(3,1,1)
+plot(f(1:end),pxx(1:end,lab==1))
+hold on
+plot(f(1:end),mean(pxx(1:end,lab==1),2),'k','LineWidth',3)
+title('The 7.5Hz signal')
+% legend('Trial1','Trial2','Trial3','Trial4','Trial5','Trial6','Average')
+axis([0,40,0,inf])
+
+subplot(3,1,2)
+plot(f(1:end),pxx(1:end,lab==2))
+hold on
+plot(f(1:end),mean(pxx(1:end,lab==2),2),'k','LineWidth',3)
+title('The 12Hz signal')
+% legend('Trial1','Trial2','Trial3','Trial4','Trial5','Trial6','Average')
+axis([0,40,0,inf])
+
+subplot(3,1,3)
+plot(f(1:end),mean(pxx(1:end,lab==1),2),'b','LineWidth',3)
+hold on
+plot(f(1:end),mean(pxx(1:end,lab==2),2),'g','LineWidth',3)
+title('The averaged 7.5Hz signal and 10Hz signal');xlabel('Frequency(Hz)');
+legend('7.5Hz','12Hz')
+axis([0,40,0,inf])
+
+fprintf('Suject %s Channel %s',num2str(k),pres)
+% figure(4)
+% spectrogram(epochs(1,1:end,5),window,noverlap,nfft,fs,'yaxis')
+% % axis([10 20 2 3 -inf 10])
+% view([90,0])
+
+
+
+
+
+##### SOURCE END #####
+--></body></html>
